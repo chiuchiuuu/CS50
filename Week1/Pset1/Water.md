@@ -4,7 +4,7 @@
 
 Implement a program that reports a user’s water usage, converting minutes spent in the shower to bottles of drinking water.
 
-```bash
+```sh
 $ ./water
 Minutes: 1
 Bottles: 12
@@ -27,7 +27,7 @@ Suffice it to say that the longer you shower, the more water you use. But just h
 
 Your program should behave per the example below. Assumed that the underlined text is what some user has typed.
 
-```bash
+```sh
 $ ./water
 Minutes: 10
 Bottles: 120
