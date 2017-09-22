@@ -4,8 +4,6 @@
 #include <cs50.h>
 #include <string.h>
 
-bool isequal(string s1, string s2);
-
 int main(int argc, string argv[])
 {
     if (argc != 2)
@@ -21,7 +19,7 @@ int main(int argc, string argv[])
     {
         //one character
         password[1] = '\0';
-        if (isequal(argv[1], crypt(password, salt)))
+        if (strcmp(argv[1], crypt(password, salt)) == 0)
         {
             printf("%s\n", password);
             return 0;
@@ -30,7 +28,7 @@ int main(int argc, string argv[])
         {
             //two characters
             password[2] = '\0';
-            if (isequal(argv[1], crypt(password, salt)))
+            if (strcmp(argv[1], crypt(password, salt)) == 0)
             {
                 printf("%s\n", password);
                 return 0;
@@ -39,7 +37,7 @@ int main(int argc, string argv[])
             {
                 //three characters
                 password[3] = '\0';
-                if (isequal(argv[1], crypt(password, salt)))
+                if (strcmp(argv[1], crypt(password, salt)) == 0)
                 {
                 printf("%s\n", password);
                 return 0;
@@ -48,7 +46,7 @@ int main(int argc, string argv[])
                 {
                     //four characters
                     password[4] = '\0';
-                    if (isequal(argv[1], crypt(password, salt)))
+                    if (strcmp(argv[1], crypt(password, salt)) == 0)
                     {
                         printf("%s\n", password);
                         return 0;
@@ -57,18 +55,4 @@ int main(int argc, string argv[])
             }
         }
     }
-    
-}
-
-bool isequal(string s1, string s2)
-{
-    //check if two strings equal, assume their length are the same
-    for (int i = 0, n = strlen(s1); i < n; i++)
-    {
-        if (s1[i] != s2[i])
-        {
-            return false;
-        }
-    }
-    return true;
 }
