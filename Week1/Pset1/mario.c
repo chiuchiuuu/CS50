@@ -28,15 +28,11 @@ int main(void)
 void print_space(int n)
 {
     for(int i = 0; i < n; i++)
-    {
         printf(" ");
-    }
 }
 
 void print_hash(int n)
 {
     for(int i = 0; i < n; i++)
-    {
         printf("#");
-    }
 }
