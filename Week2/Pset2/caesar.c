@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-char encrypt(char letter, int key, int lettercase);
-
 int main(int argc, string argv[])
 {
     if (argc != 2)
@@ -15,7 +13,7 @@ int main(int argc, string argv[])
     }
     printf("plaintext:  ");
     string plaintext = get_string();
-    int key = atoi(argv[1]) % 26;  //make key from 1 to  26
+    int key = atoi(argv[1]); 
     
     printf("ciphertext: ");
     for (int i = 0, n = strlen(plaintext); i < n; i++)
@@ -23,11 +21,11 @@ int main(int argc, string argv[])
         char letter = plaintext[i];
         if (isupper(letter))  //deal with uppercase letter
         {
-            printf("%c", encrypt(letter, key, 1));
+            printf("%c", 'A' + (plaintext[i] - 'A' + key) % 26);  // using relative position
         }
         else if (islower(letter))  //deal with lowercase letter
         {
-            printf("%c", encrypt(letter,key, 2));
+            printf("%c", 'a' + (plaintext[i] - 'a' + key) % 26);
         }
         else
         {
@@ -36,21 +34,4 @@ int main(int argc, string argv[])
     }
     printf("\n");
     return 0;
-}
-
-char encrypt(char letter, int key, int lettercase)  
-{
-    // encrypt single letter
-    // 1 means uppercase and 2 means lowercase
-    
-    char std = lettercase == 1 ? 'Z' : 'z';
-    
-    if (letter + key > std)   // encrypt and return
-    {
-        return (letter + key - 26);
-    }
-    else
-    {
-        return (letter + key);
-    }
 }
