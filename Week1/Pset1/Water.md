@@ -4,7 +4,7 @@
 
 Implement a program that reports a user’s water usage, converting minutes spent in the shower to bottles of drinking water.
 
-```
+```shell
 $ ./water
 Minutes: 1
 Bottles: 12
@@ -27,7 +27,7 @@ Suffice it to say that the longer you shower, the more water you use. But just h
 
 Your program should behave per the example below. Assumed that the underlined text is what some user has typed.
 
-```
+```shell
 $ ./water
 Minutes: 10
 Bottles: 120
@@ -37,6 +37,6 @@ Bottles: 120
 
 - You can use the function `get_int` to prompt the user to input an integer value, as per the below:
 
-  ```
+  ```c
   int minutes = get_int();
   ```
