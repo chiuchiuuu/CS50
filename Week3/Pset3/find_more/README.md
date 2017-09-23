@@ -216,11 +216,11 @@ Complete the implementation of `find` by completing the implementation of `searc
 
 - Your implementation must return `true` if `value` is in `values` and `false` if `value` is not in `values`.
 
-- The running time of your implementation must be in *O*(log *n*).
+- The running time of your implementation must be in $O(\log n)$.
 
 - You may not alter the function’s declaration. Its prototype must remain:
 
-  ```
+  ```c
   bool search(int value, int values[], int n);
   ```
 
@@ -234,7 +234,7 @@ Complete the implementation of `find` by completing the implementation of `searc
 
 - You may not alter the function’s declaration. Its prototype must remain:
 
-  ```
+  ```c
   void sort(int values[], int n);
   ```
 
@@ -258,7 +258,7 @@ Found needle in haystack!
 
 ## [Hints](http://docs.cs50.net/problems/find/more/find.html#hints)
 
-Before you implement `search` in *O*(log *n*) time, you might want to implement it temporarily in *O*(*n*) time, as with linear search, if only because it’s a bit easier to get right. That way, you can move on to `sort`, knowing that `search` already works. And once `sort` works, you can go back and re-implement `search` in *O*(log *n*) time, as with binary search. Just remember to!
+Before you implement `search` in $O(\log n)$ time, you might want to implement it temporarily in $O(n)$ time, as with linear search, if only because it’s a bit easier to get right. That way, you can move on to `sort`, knowing that `search` already works. And once `sort` works, you can go back and re-implement `search` in $O(\log n)$time, as with binary search. Just remember to!
 
 Ultimately, you are welcome to implement `search` iteratively (with a loop) or recursively (wherein a function calls itself). If you pursue the latter, though, know that you may not change our declaration of `search`, but you may write a new, recursive function (that perhaps takes different parameters) that `search` itself calls.
 
