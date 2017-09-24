@@ -1,0 +1,16 @@
+1.  stdint.h is a header file in the C standard library. It declares sets of integer types having specified widths, and defines 
+    corresponding sets of macros. It also defines macros that specify limits of integer types corresponding to types defined in 
+    other standard headers.
+2.  declare sets of integer types having specified widths. Using well-defined types makes the code far easier and safer to port 
+    since you won't get any surprises when one machine interprets int as 16-bit and another as 32-bit. What you type is what you 
+    get when you use them.
+3.  1, 4, 4, 2
+4.  bfType
+5.  bfSize is the size, in bytes, of the bitmap file. biSize is the number of bytes required by the structure.
+6.  the bitmap is a top-down DIB and its origin is the upper-left corner.
+7.  biBitCount
+8.  user may input a wrong file name so that fopen() can't find that file and return NULL
+9.  because we want to read one structure at a time
+10. 3
+11. if there are paddings, skip over them i.e. change the pointer to the next RGBTRIPLE structure.
+12. the current location of the file pointer
