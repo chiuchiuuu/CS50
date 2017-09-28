@@ -44,7 +44,7 @@ bool search(int value, int values[], int n)
  * using counting sort
  */
 // maximum amount of hay
-const int MAX = 65536;
+#define MAX 65536;
 void sort(int values[], int n)
 {
     // create a new array, whose indexes is the elements of values
