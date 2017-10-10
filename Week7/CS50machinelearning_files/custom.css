@@ -1,0 +1,515 @@
+<!--
+
+This is CS50 Index.
+
+David J. Malan
+malan@harvard.edu
+
+-->
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+
+        <meta content="initial-scale=1, width=device-width" name="viewport"/>
+        <meta content="en" http-equiv="Content-Language"/> <!-- suppress Google Translate in Chrome -->
+        <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+        <script>
+
+            // TEMP until moment.js adds support for RFC 2822
+            // http://momentjs.com/docs/#/parsing/special-formats/
+            moment.RFC_2822 = 'ddd, DD MMM YYYY HH:mm:ss ZZ';
+
+            // highlightable languages
+            var LANGUAGES = [
+                '.adoc',
+                '.asc',
+                '.asciidoc',
+                '.c',
+                '.css',
+                '.h',
+                '.html',
+                '.js',
+                '.json',
+                'Makefile',
+                '.m',
+                '.php',
+                '.plist',
+                '.sql',
+                '.txt',
+                '.xml'
+            ];
+
+            // S3 bucket
+            var BUCKET = 'https://s3.amazonaws.com/' + window.location.hostname + '/';
+
+            // onDOMReady
+            $(function() {
+
+                // set title
+                $('title').html(window.location.hostname);
+
+                // *.src
+                if (window.location.pathname.match(/\.src$/)) {
+
+                    // trim suffix
+                    var src = window.location.href.replace(/\.src$/, '');
+
+                    // extract filename
+                    var filename = src.split('/').pop();
+
+                    // check whether supported
+                    if (!_.some(LANGUAGES, function(value, index, list) { return filename.match(new RegExp(value + '$')); })) {
+
+                        // TODO: standardize how to handle errors
+                        $('body').append('400 Bad Request');
+                        return;
+                    }
+
+                    // fetch source
+                    $.ajax({
+                        dataType: 'text',
+                        url: src
+                    })
+                    .done(function(data, textStatus, jqXHR) {
+                        
+                        // inject highlight.js's CSS
+                        $('head').prepend('<link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/xcode.min.css" rel="stylesheet"/>');
+
+                        // extract extension
+                        var extension = filename.split('.').pop();
+
+                        // TEMP until resolved by library
+                        if (extension === 'Makefile') {
+                            extension = 'makefile';
+                        }
+                        else if (extension === 'adoc' || extension === 'asc') {
+                            extension = 'asciidoc';
+                        }
+
+                        // prepare body
+                        $('body').append('<pre><code class="language-' + _.escape(extension) + '">' + _.escape(data) + '</code>');
+
+                        // highlight source
+                        hljs.highlightBlock($('pre code')[0]);
+                    })
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+
+                        // TODO: make this match other 404, which uses Bootstrap
+                        $('body').append('404 Not Found');
+                    });
+                }
+
+                // *
+                else {
+
+                    // inject Bootstrap's CSS
+                    $('head').prepend('<link href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet"/>');
+
+                    // prepare body for HTML
+                    $('body').append(
+                        '<div class="container-fluid">' +
+                        '<table class="table table-striped">' + 
+                        '<thead>' +
+                        '<tr>' +
+                        '<th colspan="4"></th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>' +
+                        '</tbody>' +
+                        '<tfoot>' +
+                        '</tfoot>' +
+                        '</table>' +
+                        '</div>'
+                    );
+
+                    // get Contents of bucket for current path
+                    getContents(window.location.pathname.replace(/^\//, ''));
+                }
+            });
+
+            // gets bucket's Contents having prefix
+            function getContents(prefix, marker) {
+
+                // Contents
+                var Contents = [];
+
+                // prepare URL
+                var url = BUCKET + '?prefix=' + prefix + '&delimiter=/';
+                if (!_.isUndefined(marker)) {
+                    url += '&marker=' + marker;
+                }
+
+                // get Contents
+                $.ajax({
+                    dataType: 'xml',
+                    url: url
+                })
+                .done(function(data, textStatus, jqXHR) {
+
+                    // CommonPrefixes
+                    $(data).find('CommonPrefixes Prefix').each(function(index, element) {
+                        var Key = $(element).text();
+                        Contents[Key] = {
+                            Key: Key
+                        };
+                    });
+    
+                    // Contents
+                    $(data).find('Contents').each(function(index, element) {
+                        var Key = $(element).find('Key').text();
+                        Contents[Key] = {
+                            Key: Key,
+                            LastModified: $(element).find('LastModified').text(),
+                            Size: $(element).find('Size').text()
+                        };
+                    });
+
+                    // get more Contents if truncated
+                    if ($(data).find('IsTruncated').text() === "true") {
+                        getContents(prefix, $(data).find('NextMarker').text());
+                        return;
+                    }
+
+                    // sort Contents naturally
+                    var values = _.values(Contents);
+                    values.sort(function(a, b) {
+                        return strnatcasecmp(a.Key, b.Key);
+                    });
+
+                    // if URL ends with foo but foo/ exists, redirect to foo/
+                    if (!window.location.href.match(/\/$/)) {
+                        var prefix = window.location.pathname.replace(/^\//, '') + '/';
+                        if (!_.isUndefined(_.findWhere(values, {Key: prefix}))) {
+                            window.location.href = window.location.href + '/';
+                            return;
+                        }
+                    }
+
+                    // if URL still ends with foo or if no Contents, reveal 404
+                    if (!window.location.href.match(/\/$/) || _.isEmpty(values)) {
+                        $('th').addClass('danger').append('404 Not Found');
+                        return;
+                    }
+
+                    // render breadcrumbs in table heading
+                    var ancestors = window.location.pathname.split('/').map(decodeURIComponent).slice(1, -1);
+                    $('th').append('<a href="/">' + window.location.hostname + '/</a>');
+                    for (var i = 0; i < ancestors.length; i++) {
+                        $('th').append(_.template('<a href="/<%= path %>"><%- ancestor %></a>')({
+                            ancestor: ancestors[i] + '/',
+                            path: ancestors.slice(0, i + 1).map(encodeURIComponent).join('/') + '/'
+                        }));
+                    }
+
+                    // render row for ..
+                    if (!_.isEmpty(ancestors)) {
+                        $('tbody').append('<tr><td colspan="4"><a class="parent" href="../">../</a></td></tr>');
+                    }
+
+                    // iterate over sorted Contents
+                    _.each(values, function(o) {
+                        
+                        // omit these
+                        if (_.indexOf(['index50.html', 'status'], o.Key) > -1) {
+                            return;
+                        }
+
+                        // extract filename from key
+                        var filename = _.last(o.Key.replace(/\/$/, '').split(/\//));
+
+                        // also ignore dotfiles
+                        if (filename.match(/^\./)) {
+                            return;
+                        }
+
+                        // render row
+                        if (_.isUndefined(o.Size)) {
+                            $('tbody').append(_.template('<tr><td colspan="4"><a href="<% print(encodeURIComponent(Key)) %>/"><%- Key %>/</a></td></tr>')({
+                                Key: filename
+                            }));
+                        }
+                        else if (!o.Key.match(/\.(md5|sha1|sha256)$/)) {
+                            var ETag = '<td class="ETag">';
+                            if (!_.isUndefined(Contents[o.Key + '.md5'])) {
+                                ETag += '<a href="<% print(encodeURIComponent(Key)) %>.md5">MD5</a>';
+                            }
+                            if (!_.isUndefined(Contents[o.Key + '.sha1'])) {
+                                ETag += '<a href="<% print(encodeURIComponent(Key)) %>.sha1">SHA1</a>';
+                            }
+                            if (!_.isUndefined(Contents[o.Key + '.sha256'])) {
+                                ETag += '<a href="<% print(encodeURIComponent(Key)) %>.sha256">SHA256</a>';
+                            }
+                            ETag += '</td>';
+                            $('tbody').append(_.template(
+                                '<tr>' +
+                                '<td class="Key">' +
+                                '<a href="<% print(encodeURIComponent(Key)) %>"><%- Key %></a> ' + 
+                                '<a class="download" href="<% print(encodeURIComponent(Key)) %>.download">download</a> ' +
+                                '<a class="torrent" href="<% print(encodeURIComponent(Key)) %>.torrent">torrent</a> ' +
+                                ((_.some(LANGUAGES, function(value, index, list) { return filename.match(new RegExp(value.replace('.', '\\.') + '$')); })) ? '<a class="view" href="<% print(encodeURIComponent(Key)) %>.src">view</a>' : '') +
+                                '</td>' +
+                                '<td class="readable Size" data-Size="<%- Size %>">' +
+                                '<% print(bytesToSize(Size)) %>' +
+                                '</td>' +
+                                '<td class="readable LastModified" data-LastModified="<%- LastModified %>">' +
+                                '<% print(moment(LastModified, moment.RFC_2822).fromNow()) %>' +
+                                '</td>' +
+                                ETag +
+                                '</tr>'
+                            )({
+                                'Key': filename,
+                                'LastModified': moment(o.LastModified, moment.ISO_8601).format(moment.RFC_2822),
+                                'Size': o.Size
+                            }));
+                        }
+                    });
+
+                    // listen for clicks on Size
+                    $('.readable.Size').click(function() {
+                        $(this).removeClass('readable').text($(this).attr('data-Size')).off();
+                    });
+
+                    // listen for clicks on LastModified
+                    $('.readable.LastModified').click(function() {
+                        $(this).removeClass('readable').text($(this).attr('data-LastModified')).off();
+                    });
+                });
+            }
+
+            /**
+             * Convert number of bytes into human readable format.
+             *
+             * @see http://codeaid.net/javascript/convert-size-in-bytes-to-human-readable-format-(javascript)
+             *
+             * @param integer bytes Number of bytes to convert
+             * @param integer precision Number of digits after the decimal separator
+             * @return string
+             */
+            function bytesToSize(bytes, precision)
+            {   
+                if (_.isUndefined(bytes)) {
+                    return undefined;
+                }
+                var kilobyte = 1024;
+                var megabyte = kilobyte * 1024;
+                var gigabyte = megabyte * 1024;
+                var terabyte = gigabyte * 1024;
+                if ((bytes >= 0) && (bytes < kilobyte)) {
+                    return bytes + ' B';
+                }
+                else if ((bytes >= kilobyte) && (bytes < megabyte)) {
+                    return (bytes / kilobyte).toFixed(precision) + ' KB';
+                }
+                else if ((bytes >= megabyte) && (bytes < gigabyte)) {
+                    return (bytes / megabyte).toFixed(precision) + ' MB';
+                }
+                else if ((bytes >= gigabyte) && (bytes < terabyte)) {
+                    return (bytes / gigabyte).toFixed(precision) + ' GB';
+                }
+                else if (bytes >= terabyte) {
+                    return (bytes / terabyte).toFixed(precision) + ' TB';
+                }
+                else {
+                    return bytes + ' B';
+                }
+            }
+
+            /**
+             * A JavaScript equivalent of PHP’s strnatcasecmp.
+             *
+             * original by: Martin Pool
+             * reimplemented by: Pierre-Luc Paour
+             * reimplemented by: Kristof Coomans (SCK-CEN (Belgian Nucleair Research Centre))
+             * reimplemented by: Brett Zamir (http://brett-zamir.me)
+             * bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+             * input by: Devan Penner-Woelk
+             * improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+             *
+             * example 1: strnatcasecmp(10, 1);
+             * returns: 1
+             *
+             * example: strnatcasecmp('1', '10');
+             * returns: -1
+             *
+             * @see http://phpjs.org/functions/strnatcasecmp/
+             *
+             * @param string str1 left operand
+             * @param string str2 right operand
+             * @return number
+             */
+            function strnatcasecmp(str1, str2) {
+                var a = (str1 + '').toLowerCase();
+                var b = (str2 + '').toLowerCase();
+                var isWhitespaceChar = function(a) {
+                    return a.charCodeAt(0) <= 32;
+                };
+                var isDigitChar = function(a) {
+                    var charCode = a.charCodeAt(0);
+                    return (charCode >= 48 && charCode <= 57);
+                };
+                var compareRight = function(a, b) {
+                    var bias = 0;
+                    var ia = 0;
+                    var ib = 0;
+                    var ca;
+                    var cb;
+                    // The longest run of digits wins.  That aside, the greatest
+                    // value wins, but we can't know that it will until we've scanned
+                    // both numbers to know that they have the same magnitude, so we
+                    // remember it in BIAS.
+                    for (var cnt = 0; true; ia++, ib++) {
+                        ca = a.charAt(ia);
+                        cb = b.charAt(ib);
+                        if (!isDigitChar(ca) && !isDigitChar(cb)) {
+                            return bias;
+                        } 
+                        else if (!isDigitChar(ca)) {
+                            return -1;
+                        } 
+                        else if (!isDigitChar(cb)) {
+                            return 1;
+                        }
+                        else if (ca < cb) {
+                            if (bias === 0) {
+                                bias = -1;
+                            }
+                        }
+                        else if (ca > cb) {
+                            if (bias === 0) {
+                                bias = 1;
+                            }
+                        }
+                        else if (ca === '0' && cb === '0') {
+                            return bias;
+                        }
+                    }
+                };
+                var ia = 0, ib = 0;
+                var nza = 0, nzb = 0;
+                var ca, cb;
+                var result;
+                while (true) {
+                    // only count the number of zeroes leading the last number compared
+                    nza = nzb = 0;
+                    ca = a.charAt(ia);
+                    cb = b.charAt(ib);
+                    // skip over leading spaces or zeros
+                    while (isWhitespaceChar(ca) || ca === '0') {
+                        if (ca === '0') {
+                            nza++;
+                        }
+                        else {
+                            // only count consecutive zeroes
+                            nza = 0;
+                        }
+                        ca = a.charAt(++ia);
+                    }
+                    while (isWhitespaceChar(cb) || cb === '0') {
+                        if (cb === '0') {
+                            nzb++;
+                        }
+                        else {
+                            // only count consecutive zeroes
+                            nzb = 0;
+                        }
+                        cb = b.charAt(++ib);
+                    }
+                    // process run of digits
+                    if (isDigitChar(ca) && isDigitChar(cb)) {
+                        if ((result = compareRight(a.substring(ia), b.substring(ib))) !== 0) {
+                            return result;
+                        }
+                    }
+                    if (ca === '0' && cb === '0') {
+                        // The strings compare the same.  Perhaps the caller
+                        // will want to call strcmp to break the tie.
+                        return nza - nzb;
+                    }
+                    if (ca < cb) {
+                        return -1;
+                    }
+                    else if (ca > cb) {
+                        return +1;
+                    }
+                    // prevent possible infinite loop
+                    if (ia >= a.length && ib >= b.length) {
+                        return 0;
+                    }
+                    ++ia;
+                    ++ib;
+                }
+            }
+ 
+        </script>
+        <style>
+
+            /* eliminate padding around Bootstrap's container */
+            .container-fluid {
+                padding: 0;
+            }
+
+            /* render secondary text in gray */
+            .Key :nth-child(n+2), .Size, .LastModified, .ETag a {
+                color: #ccc;
+            }
+
+            /* render secondary text smaller with spacing */
+            .Key :nth-child(n+2), .Size, .LastModified, .ETag a {
+                font-size: small;
+                padding-left: 1ex;
+            }
+
+            /* match links' color */
+            .Key :nth-child(n+2):hover {
+                color: #428bca;
+            }
+
+            /* make ../ easier to click */
+            .parent {
+                letter-spacing: 5px;
+            }
+
+            /* draw attention to clickability of Size and LastModified */
+            .readable.Size:hover, .readable.LastModified:hover {
+                cursor: zoom-in;
+            }
+
+            /* override Bootstrap's alignment */
+            .table > thead > tr > th,
+            .table > tbody > tr > th,
+            .table > tfoot > tr > th,
+            .table > thead > tr > td,
+            .table > tbody > tr > td,
+            .table > tfoot > tr > td {
+                vertical-align: middle;
+            }
+
+            /* right-align ETag */
+            td:nth-child(4) {
+                text-align: right;
+            }
+
+            /* heading */
+            thead {
+                font-size: larger;
+                word-break: break-all; /* let long paths wrap */
+            }
+
+            /* hide all secondary text except Size on small screens */
+            @media only screen and (max-width: 640px) {
+                .download, .torrent, .LastModified, .ETag {
+                    display: none;
+                }
+            }
+
+        </style>
+        <title></title>
+    </head>
+    <body></body>
+</html>
