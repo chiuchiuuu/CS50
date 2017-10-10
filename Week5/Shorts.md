@@ -1,4 +1,4 @@
-#Shorts
+# Shorts
 
 ## Singly-Linked Lists
 
@@ -290,7 +290,7 @@ A **collision** occurs when two pieces of data, when run through the hash functi
 
 #### Resolving collisions: Linear probing
 
-![5](C:\Users\q3026\Documents\GitHub\CS50\Week5/5.png)
+![5](5.png)
 
 - Linear probing is subject to a problem called **clustering**. Once there's a miss, two adjacent cells will contain data, making it more likely in the future that the cluster will  grow
 - the limitation of array (the limitation of hash code)
