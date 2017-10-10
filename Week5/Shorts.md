@@ -1,8 +1,4 @@
----
-typora-copy-images-to: ./
----
-
-#Shorts
+# Shorts
 
 ## Singly-Linked Lists
 
@@ -88,9 +84,9 @@ insert a new node into the linked list
 
 - **fix the prev pointer of the old head of the linked list**
 
-  ![1](C:\Users\q3026\Documents\GitHub\CS50\Week5/1.png)
+  ![1](1.png)
 
-  ![2](C:\Users\q3026\Documents\GitHub\CS50\Week5/2.png)
+  ![2](2.png)
 
 - return a pointer to the new head of the linked list
 
@@ -102,9 +98,9 @@ delete a single element from a linked list
 
 - free target
 
-  ![3](C:\Users\q3026\Documents\GitHub\CS50\Week5/3.png)
+  ![3](3.png)
 
-  ![4](C:\Users\q3026\Documents\GitHub\CS50\Week5/4.png)
+  ![4](4.png)
 
 
 
@@ -294,7 +290,7 @@ A **collision** occurs when two pieces of data, when run through the hash functi
 
 #### Resolving collisions: Linear probing
 
-![5](C:\Users\q3026\Documents\GitHub\CS50\Week5/5.png)
+![5](5.png)
 
 - Linear probing is subject to a problem called **clustering**. Once there's a miss, two adjacent cells will contain data, making it more likely in the future that the cluster will  grow
 - the limitation of array (the limitation of hash code)
@@ -303,7 +299,7 @@ A **collision** occurs when two pieces of data, when run through the hash functi
 
 - array of data -> array of nodes
 
-  ![6](C:\Users\q3026\Documents\GitHub\CS50\Week5/6.png)
+  ![6](6.png)
 
   ​
 
@@ -333,5 +329,5 @@ typedef struct _trie
 trie;
 ```
 
-![7](C:\Users\q3026\Documents\GitHub\CS50\Week5/7.png)
+![7](7.png)
 
