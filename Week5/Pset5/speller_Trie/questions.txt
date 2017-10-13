@@ -1,0 +1,13 @@
+0.  a synonym for the disease known as silicosis
+1.  returns resource usage measures. in speller.c, return resource usage statistics for the calling process, since the first argument is RUSAGE_SELF
+2.  16
+3.  in getrusage prototype, the second argument is struct rusage *usage. usage is a pointer, so we need to pass by reference
+4.  speller.c create an array called word to store words from file one by one.
+    for loop initialize c calling fgetc(fp), and while c not equal to end of file(EOF), it will keep reading the file character by character
+    if c is alphabetical letter, it will append to word[], if c is single quote and index > 0, it will also append to word[]. then index++
+        if length of word[] is greater than maximum length of a word (which is 45 here) then we will discard it.
+    if c is numbers, we will skip it. the while loop keep calling fgetc(fp) until c is not number (not reach EOF of course)
+    if c is not alphabetical letter or numbers and index > 0, we must have found a whole word. we add '\0' to word[] means the end of the word(string)
+    so per the for loop we can read words from file.
+5.  fscanf and %s read a string separated by space(' '), it will blindly read a whole string which may including numbers, punctuation or other special symbol.
+6.  make sure the pointer will not change accidentally.
