@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Status</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>Transacted date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row["symbol"] }}</td>
+                {% if row["share"] > 0 %}
+                <td>buy</td>
+                {% else %}
+                <td>sell</td>
+                {% endif %}
+                <td>{{ row["share"]|abs }}</td>
+                <td>${{ row["price"] }}</td>
+                <td>{{ row["transacted"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

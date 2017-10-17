@@ -382,10 +382,92 @@ call once
 
 
 
+#### AJAX
+
+AJAX, asynchronous JavaScript in XML, allow you to query from a browser, a server to get more data without reload the whole page
+
+##### Example
+
+```html
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+        <script>
+
+            function quote()
+            {
+                var url = '/quote?symbol=' + $('#symbol').val();
+                $.getJSON(url, function(data) {  
+                    // $.getJSON means jQuery.getJSON
+                    // data is retrived as JSON
+                    // html is a method to change value of a variable
+                    $('#quote').html('A share of ' + data.name + ' costs $' + data.price + '.');
+                    // reset the field
+                    $('#symbol').val('');
+                });
+            }
+
+        </script>
+        <title>ajax2</title>
+    </head>
+    <body>
+        <form onsubmit="quote(); return false;">
+            <input autocomplete="off" autofocus id="symbol" placeholder="Symbol" type="text"/>
+            <input type="submit" value="Get Quote"/>
+        </form>
+        <p id="quote"></p>
+    </body>
+</html>
+```
+
+JavaScript can reduce work of server and make part of things done on client side, i.e. in browser locally. But it can cause problem in aspects of security check, validation check. For example, JavaScript can be turned off in browser. 
+
 #### callbacks
 
 a function is configured to be called at a certain point in time  when event happen
 
-#### AJAX
+```html
+<!DOCTYPE html>
 
-allow you to query from a browser, a server to get more data
+<html>
+    <head>
+      	// fill div into whole page
+        <style>
+
+            html, body, #map
+            {
+                height: 100%;
+                margin: 0;
+            }
+
+        </style>
+        <title>map</title>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script>
+
+            function initMap() {
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: 39.833, lng: -98.583},
+                    zoom: 4
+                });
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: {lat: 42.3762, lng: -71.1158}
+                });
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: {lat: 41.3104, lng: -72.9289}
+                });
+            }
+
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKMo-DfSUsW3LvS1C0xxKGOSX2A1HxNx4&callback=initMap"></script>
+    </body>
+</html>
+```
+

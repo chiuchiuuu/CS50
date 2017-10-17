@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main %}
+    <ul class="list-group">
+        <li class="list-group-item"><b>Your id</b>: {{ rows[0]["id"] }}</li>
+        <li class="list-group-item"><b>Your username</b>: {{ rows[0]["username"] }}</li>
+        <li class="list-group-item"><a href="{{ url_for('change_password') }}">change password</a></li>
+    </ul>
+{% endblock %}
