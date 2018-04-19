@@ -1,8 +1,19 @@
-1. Watch [Week 2’s lecture](https://video.cs50.net/2016/fall/lectures/2).
-2. Infer a user’s initials from their name with `initials.c`.
-3. Choose two adventures:
-   - Implement Caesar’s cipher.
-   - Implement Vigenère’s cipher.
-   - Crack passwords.
-4. Submit your code.
-5. Submit a form.
+# 练习
+
+## `caesar.c`
+
+利用凯撒加密算法加密一段字符串
+
+## `crack.c`
+
+暴力破解密码（假设密码最大长度为4，且只含字母）
+
+思路是枚举，然后比较加密后的hash值
+
+## `initials.c`
+
+输出英文名字的首字母（要求大写），名字之间的空格可能不止一个。
+
+## `vigenere.c`
+
+利用vigenere加密算法加密字符串

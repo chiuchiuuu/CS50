@@ -1,10 +1,13 @@
 # Problem Set 4: Forensics
 
-## [tl;dr](http://docs.cs50.net/2017/x/psets/4/pset4.html#tl-dr)
+## recover
 
-1. Watch [Week 4’s lecture](https://video.cs50.net/2016/fall/lectures/4).
-2. Figure out whodunit.
-3. Resize some images.
-4. Recover some photos.
-5. Submit your code.
-6. Submit a form.
+根据cs50提供的raw文件复原出其中包含的jpeg图片。（假设这些图片再内存中是连续的）
+
+## resize
+
+修改图片的大小
+
+## whodunit
+
+修改图片颜色
